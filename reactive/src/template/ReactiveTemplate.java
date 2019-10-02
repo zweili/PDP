@@ -8,6 +8,7 @@ import logist.behavior.ReactiveBehavior;
 import logist.plan.Action;
 import logist.plan.Action.Move;
 import logist.plan.Action.Pickup;
+import logist.plan.Action.Delivery;
 import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.topology.Topology;
@@ -32,13 +33,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		for(City city: topology) {
 			
 			for(int i=0;i<num_a;i++) {
-				Q[num_city][i] = R[num_city][i] + discount*np(sum(T*V));
+				Q[num_city][i] = R[num_city][i] + 1;
 			}
 			
 			num_city++;
 			
 		}
-		
+		return;
 	}
 
 	@Override
@@ -62,10 +63,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		if (availableTask == null || random.nextDouble() > pPickup) {
 			City currentCity = vehicle.getCurrentCity();
+			currentCity.
 			action = new Move(currentCity.randomNeighbor(random));
 		} else {
 			action = new Pickup(availableTask);
 		}
+
 		
 		if (numActions >= 1) {
 			System.out.println("The total profit after "+numActions+" actions is "+myAgent.getTotalProfit()+" (average profit: "+(myAgent.getTotalProfit() / (double)numActions)+")");
