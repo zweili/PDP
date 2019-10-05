@@ -132,9 +132,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					for( City nextDestination : possibleDestinations ) {
 						
 						//System.out.println("cp1 V values: " + Vvalues + "\n");
-						State temp_state = new State(possibleAction,nextDestination);
-						State nextState = allStates.get(allStates.indexOf(temp_state));
-						
+						System.out.printf("a" + possibleAction + "d" + nextDestination);
+						State nextState = findState(Vvalues, possibleAction, nextDestination);
+						System.out.println("contains" + allStates.contains(nextState));
 						//System.out.println("Next state: " + nextState.currentCity + nextState.taskDestination + "\n");
 						
 						double V_ns = getVvalue(nextState);
@@ -171,6 +171,52 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			System.out.println("\n loop: " + loop_n);
 	
 		} 
+	}
+	
+	public State findState(HashMap<State, Double> Vvalues, City c,City t) {
+		String city;
+		String dest;
+		String stateCity;
+		String stateDest;
+		
+		if ( c == null) {
+			city = "NULL";
+		} else {
+			city = c.toString();
+		}
+		
+		if (t == null) {
+			dest = "NULL";
+		} else {
+			dest = t.toString();
+		}
+		
+		for (State s: Vvalues.keySet()) {
+			
+			if (s.currentCity == null) {
+				stateCity = "NULL";
+			} else {
+				stateCity = (String)s.currentCity.toString();
+			}
+			
+			if (s.taskDestination == null) {
+				stateDest = "NULL";
+			} else {
+				stateDest = s.taskDestination.toString();
+				
+			}
+			
+			System.out.println("findstate2" + stateCity + stateDest);
+			if ((city.equals(stateCity)) && (dest.equals(stateDest))){
+				System.out.printf("hello world");
+				System.out.print(s);
+				return s;
+			}
+		
+			
+		}
+		
+		return null;
 	}
 	
 	public double TransProba(State s, City a, State nextS,TaskDistribution td) {
@@ -222,7 +268,10 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		if (availableTask != null) {
 			
 			System.out.printf("availableTask");
-			State state = new State(currentCity,availableTask.deliveryCity);
+			
+			State state = findState(Vvalues,currentCity,availableTask.deliveryCity);
+			
+			System.out.println("contains" + allStates.contains(state));
 			//get best action of state
 			City bestAction = getBestAction(state);
 			
@@ -235,7 +284,10 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		} else {
 			
 			System.out.printf("availableTask_null");
-			State state = new State(currentCity,null);
+			
+			State state = findState(Vvalues,currentCity,null);
+
+			System.out.println("contains" + allStates.contains(state));
 			//get best action of state
 			City bestAction = getBestAction(state);
 			
