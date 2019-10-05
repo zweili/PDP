@@ -1,5 +1,7 @@
 package template;
 
+
+import java.util.Collections;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -18,14 +20,20 @@ import logist.topology.Topology.City;
 
 public class ReactiveTemplate implements ReactiveBehavior {
 
-	private Random random;
 	private Agent myAgent;
-	
+	private int numActions = 0;
 	
 	//V values for each state
 	private HashMap<State, Double> Vvalues = new HashMap<State, Double>();
-	
-	private HashMap<State,City> actions = new HashMap<State, City>();
+		
+	// action mappings from states
+	private HashMap<State,City> bestActions = new HashMap<State, City>();
+		
+	// list of all states
+	private ArrayList<State> allStates = new ArrayList<State>(); 
+		
+	// list of possible next actions
+	private HashMap<State, ArrayList<City>> possibleActions = new HashMap<State, ArrayList<City>>();
 	
 	
 	//reward function return expected reward from state to action.
@@ -45,105 +53,201 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	//Compute the Optimal strategy for the reactive agent.
 	public void computeStrategy(Topology topology, TaskDistribution td, Vehicle v, double gamma) {
 		
-		boolean betterValue = false;
-		ArrayList<City> allTaskDestinations = new ArrayList<City>(topology.cities()); 
+		boolean betterValue = true;
 		
-		//no task aka no taskDestination
-		allTaskDestinations.add(null);
 		
+		ArrayList<City> allCities = new ArrayList<City>(topology.cities()); 
+		
+	 
+		for (City city: allCities) {
+			
+			//all task destinations from city (possible task destinations)
+			ArrayList<City> taskDestinations = new ArrayList<City>(allCities);
+			// except current city
+			taskDestinations.remove(city);
+			// and add no task destination (means no available task)
+			taskDestinations.add(null);
+			
+			for (City destination: taskDestinations) {
+				
+
+				State state = new State(city, destination);
+				// add state to the state list
+				allStates.add(state);
+				// initialize state V value to zero
+				Vvalues.put(state, 0.0);
+				
+				// set possible actions for this state
+				// if there is an available task, then you can go to neighboring cities (refuse task) or the task city by shortest path (means picking up the task)
+				// if there are no tasks available, then you can only go to neighboring cities
+				ArrayList<City> stateActions = new ArrayList<City>(city.neighbors());
+				if(destination != null) { 
+					if(!stateActions.contains(destination)) {
+						stateActions.add(destination);	
+					}		
+				}
+				possibleActions.put(state, stateActions);
+				System.out.printf("current state actions: \n");
+				System.out.print(stateActions);
+				
+				
+			}
+		}
+		
+		
+		System.out.print("States initialized");
+		
+		int loop_n = 0;
+		
+		System.out.println("Initial V values: " + Vvalues + "\n");
 		
 		while(betterValue) {
 			
-			for (City city: topology) {
+			
+			
+			loop_n += 1;
+			
+			betterValue = false;
+			
+			for (State currstate : allStates) {
 				
-				//all task destinations from city (remove city)
-				ArrayList<City> taskDestinations = new ArrayList<City>(allTaskDestinations);
-				taskDestinations.remove(city);
 				
-				//all Neighbors of city (available actions)
-				ArrayList<City> neighbors = new ArrayList<City>(city.neighbors());
+				ArrayList<City> stateActions = possibleActions.get(currstate);
+				ArrayList<Double> Qs = new ArrayList<Double>();
 				
-				for (City destination: taskDestinations) {
+				// debug
+				//System.out.println("CurrState : " + currstate.currentCity + " " + currstate.taskDestination + "\n");
+				//System.out.println("Actions : " + stateActions + "\n");
+				
+				for (City possibleAction : stateActions) {
 					
-					State state = new State(city, destination);
-					
-					for(City action: neighbors) {
+					double Q = reward(currstate, possibleAction, td, v);
+												
+					// all task destination from the city "possibleAction"
+					ArrayList<City> possibleDestinations = new ArrayList<City>(allCities);
+					possibleDestinations.remove(possibleAction);
+					// also possibility of no new task
+					possibleDestinations.add(null);
 						
-						double Q = reward(state, action, td, v);
+					for( City nextDestination : possibleDestinations ) {
 						
-						ArrayList<City> neighborsOfAction = new ArrayList<City>(action.neighbors());
+						//System.out.println("cp1 V values: " + Vvalues + "\n");
+						State temp_state = new State(possibleAction,nextDestination);
+						State nextState = allStates.get(allStates.indexOf(temp_state));
 						
-						// all task destination from the city "action"
-						ArrayList<City> taskNextDestinations = new ArrayList<City>(allTaskDestinations);
-						taskNextDestinations.remove(action);
+						//System.out.println("Next state: " + nextState.currentCity + nextState.taskDestination + "\n");
 						
-						for( City nextDestination : taskNextDestinations ) {
+						double V_ns = getVvalue(nextState);
 						
-							State nextState = new State(action,nextDestination);
+						System.out.println("next state V value : " + V_ns + "\n");
 							
-							Q += gamma*TransProba(state,action,nextState,td)*getVvalue(nextState);
-							
+						Q += gamma*TransProba(currstate,possibleAction,nextState,td)*V_ns;
 						
-						}
+						System.out.println("delta Q value : " + gamma*TransProba(currstate,possibleAction,nextState,td)*V_ns + "\n");
+						
+						//System.out.println("cp2 V values: " + Vvalues + "\n");
 						
 					}
-					
-					
-					
-					
-					
+					Qs.add(Q);		
 				}
+				
+				
+				
+				double V = Collections.max(Qs);
+				double OldV = Vvalues.put(currstate,V);
+				
+				System.out.println("Old V: " + OldV + " New V: " + V + "\n");
+			
+				
+				
+				if (Math.abs(V-OldV)>Math.abs(OldV)*0.01) {
+					
+					betterValue = true;
+					
+				}	
+				bestActions.put(currstate, stateActions.get(Qs.indexOf(V)));
+	
 			}
-		};
-		
+			System.out.println("\n loop: " + loop_n);
+	
+		} 
 	}
 	
 	public double TransProba(State s, City a, State nextS,TaskDistribution td) {
 		
-		if( || s.currentCity.equals(nextS.currentCity)
+		return td.probability(a,nextS.taskDestination); 
+		
+		/* if( || s.currentCity.equals(nextS.currentCity)
 				|| !nextS.currentCity.equals(a)) {
 			return 0.0;
 		} else {
 			return td.probability(nextS.currentCity, nextS.taskDestination);
-			}
+			} */
 		}
+	
 	
 	public double getVvalue(State s) {
 		return Vvalues.getOrDefault(s, 0.0);
 	}
 	
+	public City getBestAction(State s) {
+		return bestActions.get(s);
+	}
 	
-	
-
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
-
+		
+		System.out.printf("running setup /n");
 		// Reads the discount factor from the agents.xml file.
 		// If the property is not present it defaults to 0.95
 		Double discount = agent.readProperty("discount-factor", Double.class,
 				0.95);
 
-		this.random = new Random();
-		this.pPickup = discount;
-		this.numActions = 0;
 		this.myAgent = agent;
 		
+		//get first vehicle
+		Vehicle v = agent.vehicles().get(0);
+		
+		computeStrategy(topology,td,v,discount);
+		System.out.printf("setup completed/n");
 	}
 
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-
-		if (availableTask == null || random.nextDouble() > pPickup) {
-			City currentCity = vehicle.getCurrentCity();
-			currentCity.
-			action = new Move(currentCity.randomNeighbor(random));
+		System.out.printf("running action \n");
+		//get current state
+		City currentCity = vehicle.getCurrentCity();
+		
+		if (availableTask != null) {
+			
+			System.out.printf("availableTask");
+			State state = new State(currentCity,availableTask.deliveryCity);
+			//get best action of state
+			City bestAction = getBestAction(state);
+			
+			if(bestAction.equals(availableTask.deliveryCity)) {
+				action = new Pickup(availableTask);
+			} else {
+				action = new Move(bestAction);
+			}
+			
 		} else {
-			action = new Pickup(availableTask);
+			
+			System.out.printf("availableTask_null");
+			State state = new State(currentCity,null);
+			//get best action of state
+			City bestAction = getBestAction(state);
+			
+			action = new Move(bestAction);
 		}
+		
 
 		
-		if (numActions >= 1) {
+
+		
+		//print every 10 actions the total and the mean profit of the agent
+		if ((numActions > 0) && (numActions % 10 == 0)) {
 			System.out.println("The total profit after "+numActions+" actions is "+myAgent.getTotalProfit()+" (average profit: "+(myAgent.getTotalProfit() / (double)numActions)+")");
 		}
 		numActions++;
