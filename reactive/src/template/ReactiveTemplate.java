@@ -295,9 +295,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 		
 
-		
-
-		
 		//print every 10 actions the total and the mean profit of the agent
 		if ((numActions > 0) && (numActions % 10 == 0)) {
 			System.out.println("The total profit after "+numActions+" actions is "+myAgent.getTotalProfit()+" (average profit: "+(myAgent.getTotalProfit() / (double)numActions)+")");
