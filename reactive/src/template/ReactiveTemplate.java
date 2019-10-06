@@ -87,8 +87,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					}		
 				}
 				possibleActions.put(state, stateActions);
-				System.out.printf("current state actions: \n");
-				System.out.print(stateActions);
 				
 				
 			}
@@ -99,7 +97,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		
 		int loop_n = 0;
 		
-		System.out.println("Initial V values: " + Vvalues + "\n");
 		
 		while(betterValue) {
 			
@@ -131,34 +128,19 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						
 					for( City nextDestination : possibleDestinations ) {
 						
-						//System.out.println("cp1 V values: " + Vvalues + "\n");
-						System.out.printf("a" + possibleAction + "d" + nextDestination);
 						State nextState = findState(Vvalues, possibleAction, nextDestination);
-						System.out.println("contains" + allStates.contains(nextState));
-						//System.out.println("Next state: " + nextState.currentCity + nextState.taskDestination + "\n");
-						
 						double V_ns = getVvalue(nextState);
-						
-						System.out.println("next state V value : " + V_ns + "\n");
 							
 						Q += gamma*TransProba(currstate,possibleAction,nextState,td)*V_ns;
-						
-						System.out.println("delta Q value : " + gamma*TransProba(currstate,possibleAction,nextState,td)*V_ns + "\n");
-						
-						//System.out.println("cp2 V values: " + Vvalues + "\n");
+
 						
 					}
 					Qs.add(Q);		
 				}
 				
-				
-				
 				double V = Collections.max(Qs);
 				double OldV = Vvalues.put(currstate,V);
-				
-				System.out.println("Old V: " + OldV + " New V: " + V + "\n");
-			
-				
+
 				
 				if (Math.abs(V-OldV)>Math.abs(OldV)*0.01) {
 					
@@ -206,30 +188,20 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				
 			}
 			
-			System.out.println("findstate2" + stateCity + stateDest);
 			if ((city.equals(stateCity)) && (dest.equals(stateDest))){
-				System.out.printf("hello world");
-				System.out.print(s);
 				return s;
 			}
-		
-			
 		}
 		
 		return null;
 	}
 	
+	
 	public double TransProba(State s, City a, State nextS,TaskDistribution td) {
 		
 		return td.probability(a,nextS.taskDestination); 
 		
-		/* if( || s.currentCity.equals(nextS.currentCity)
-				|| !nextS.currentCity.equals(a)) {
-			return 0.0;
-		} else {
-			return td.probability(nextS.currentCity, nextS.taskDestination);
-			} */
-		}
+	}
 	
 	
 	public double getVvalue(State s) {
@@ -261,17 +233,14 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-		System.out.printf("running action \n");
+		
 		//get current state
 		City currentCity = vehicle.getCurrentCity();
 		
 		if (availableTask != null) {
 			
-			System.out.printf("availableTask");
-			
 			State state = findState(Vvalues,currentCity,availableTask.deliveryCity);
 			
-			System.out.println("contains" + allStates.contains(state));
 			//get best action of state
 			City bestAction = getBestAction(state);
 			
@@ -283,11 +252,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			
 		} else {
 			
-			System.out.printf("availableTask_null");
-			
 			State state = findState(Vvalues,currentCity,null);
-
-			System.out.println("contains" + allStates.contains(state));
+			
 			//get best action of state
 			City bestAction = getBestAction(state);
 			
