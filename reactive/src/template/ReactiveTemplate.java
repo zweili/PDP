@@ -142,7 +142,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				double OldV = Vvalues.put(currstate,V);
 
 				
-				if (Math.abs(V-OldV)>Math.abs(OldV)*0.01) {
+				if (Math.abs(V-OldV)>Math.abs(OldV)*0.001) {
 					
 					betterValue = true;
 					

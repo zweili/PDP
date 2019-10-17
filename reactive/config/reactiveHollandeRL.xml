@@ -10,7 +10,7 @@
 	<topology import="config/topology/the_netherlands.xml" />
 	
 	<!-- load agents from an external file -->
-	<agents import="config/agents.xml" />
+	<agents import="config/reactive-rla.xml" />
 	
 	<!-- define task distribution -->
 	<tasks number="10" rngSeed="-6897376051029796530">
