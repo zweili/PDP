@@ -6,10 +6,9 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LogistLibrary"/>
 	<classpathentry kind="lib" path="/Users/Sky/Desktop/EPFL/Master/IntelAgent/github/lib/logist.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="file:/Users/Sky/Desktop/EPFL/Master/IntelAgent/github/javadoc/logist_deliberative/"/>
+			<attribute name="javadoc_location" value="file:/Users/Sky/Desktop/EPFL/Master/IntelAgent/github/javadoc/logist_centralized/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/Users/Sky/Desktop/EPFL/Master/IntelAgent/github/lib/repast.jar"/>

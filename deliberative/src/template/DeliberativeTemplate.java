@@ -17,11 +17,12 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class DeliberativeTemplate implements DeliberativeBehavior {
 
-	enum Algorithm { BFS, ASTAR }
+	enum Algorithm { BFS, ASTAR, NAIVE }
 	
 	/* Environment */
 	Topology topology;
 	TaskDistribution td;
+	TaskSet availableTasks;
 	
 	/* the properties of the agent */
 	Agent agent;
@@ -35,9 +36,9 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		this.topology = topology;
 		this.td = td;
 		this.agent = agent;
-		
+				
 		// initialize the planner
-		int capacity = agent.vehicles().get(0).capacity();
+		capacity = agent.vehicles().get(0).capacity();
 		String algorithmName = agent.readProperty("algorithm", String.class, "ASTAR");
 		
 		// Throws IllegalArgumentException if algorithm is unknown
@@ -52,13 +53,17 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 
 		// Compute the plan with the selected algorithm.
 		switch (algorithm) {
-		case ASTAR:
+		case NAIVE:
 			// ...
 			plan = naivePlan(vehicle, tasks);
 			break;
+		case ASTAR:
+			// ...
+			plan = new AStar(vehicle, tasks).AStarPlan(capacity);
+			break;
 		case BFS:
 			// ...
-			plan = naivePlan(vehicle, tasks);
+			plan = new BFS(vehicle, tasks).BFSPlan(capacity);
 			break;
 		default:
 			throw new AssertionError("Should not happen.");
@@ -93,9 +98,11 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	public void planCancelled(TaskSet carriedTasks) {
 		
 		if (!carriedTasks.isEmpty()) {
-			// This cannot happen for this simple agent, but typically
-			// you will need to consider the carriedTasks when the next
-			// plan is computed.
+				//left empty on purpose
 		}
 	}
 }
+
+///
+
+
