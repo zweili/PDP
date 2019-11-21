@@ -3,10 +3,10 @@
 <agents>
 	<!-- A list of agents and their behavior classes -->
 	
-	<!-- #### CENTRALIZED AGENTS ### -->
-	<agent name="centralized-main">
+	<!-- #### AUCTION AGENTS ### -->
+	<agent name="auction-random">
 		<set class-path="bin/"/>
-		<set class-name="template.CentralizedTemplate"/>
+		<set class-name="template.AuctionTemplate"/>
 	</agent>
 	
 </agents>

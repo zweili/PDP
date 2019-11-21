@@ -63,6 +63,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
         
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
         //Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
+        System.out.print(vehicles+"\n");
         SLS SLSplanner = new SLS(vehicles,tasks);
         List<Plan> plans = new ArrayList<Plan>();
         plans.addAll(SLSplanner.BuildPLans()); 
